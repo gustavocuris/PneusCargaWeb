@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.tsbuildinfo
+landing-*-check.png
+landing-check*.png
+mobile-*-check.png
+locations-check.png
+vite.config.js
+vite.config.d.ts
