@@ -7,4 +7,8 @@ export default defineConfig({
     host: '0.0.0.0',
     allowedHosts: ['.ngrok-free.dev', 'whoops-ricotta-bouncing.ngrok-free.dev'],
   },
+  preview: {
+    host: '0.0.0.0',
+    allowedHosts: true,
+  },
 });
