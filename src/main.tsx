@@ -1,6 +1,21 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
-import { ArrowRight, BadgeCheck, Gauge, MapPin, MessageCircle, Phone, ShieldCheck, Truck, Wrench } from 'lucide-react';
+import {
+  ArrowRight,
+  BadgeCheck,
+  Gauge,
+  Lock,
+  MapPin,
+  MessageCircle,
+  Phone,
+  Plus,
+  Save,
+  ShieldCheck,
+  Trash2,
+  Truck,
+  Upload,
+  Wrench,
+} from 'lucide-react';
 import './styles.css';
 import heroImage from './assets/Novo Fundo.png';
 import logoImage from './assets/LOGO MAIOR.png';
@@ -27,13 +42,30 @@ const phoneNumber = '5511910729582';
 const whatsappText = encodeURIComponent('Olá! Vim pela landing page e quero cotar pneus para caminhão.');
 const whatsappUrl = `https://wa.me/${phoneNumber}?text=${whatsappText}`;
 
-const stores = [
+type Store = {
+  id: string;
+  name: string;
+  address: string;
+  phone: string;
+  whatsapp: string;
+  imageSrc?: string;
+  imageSrcTwo?: string;
+};
+
+type GalleryImage = {
+  src: string;
+  alt: string;
+};
+
+const defaultStores: Store[] = [
   {
     id: 'piratininga',
     name: 'Loja Piratininga',
     address: 'R. Montalverne, 136 - Piratininga, Osasco - SP, 06230-020',
     phone: '(11) 3656-0634',
     whatsapp: '551136560634',
+    imageSrc: galleryImages[0]?.src,
+    imageSrcTwo: galleryImages[1]?.src,
   },
   {
     id: 'novo-osasco',
@@ -41,17 +73,670 @@ const stores = [
     address: 'Av. Visc. de Nova Granada, 42A - Vila Osasco, Osasco - SP',
     phone: '(11) 3683-4125',
     whatsapp: '551136834125',
+    imageSrc: galleryImages[1]?.src,
+    imageSrcTwo: galleryImages[2]?.src,
   },
-] as const;
+] as Store[];
+
+type TireItem = {
+  imageIndex: number;
+  imageSrc?: string;
+  measure: string;
+  brand: string;
+  value: string;
+};
+
+type TireSlide = {
+  id: string;
+  eyebrow: string;
+  title: string;
+  description: string;
+  layout: 'grid' | 'recapagem';
+  items: TireItem[];
+};
+
+const tireStorageKey = 'intercap-tire-showcase';
+const galleryStorageKey = 'intercap-gallery-images';
+const storesStorageKey = 'intercap-stores';
+const employeePassword = 'IPN@2026';
+
+const defaultTireShowcaseSlides: TireSlide[] = [
+  {
+    id: 'novos',
+    eyebrow: 'Pneus novos',
+    title: 'Pneus novos',
+    description: 'Opcoes para carga pesada com medida, marca e valor para consulta rapida.',
+    layout: 'grid',
+    items: [
+      { imageIndex: 0, measure: '295/80R22.5', brand: 'Bridgestone', value: 'R$00,00' },
+      { imageIndex: 1, measure: '275/80R22.5', brand: 'Goodyear', value: 'R$00,00' },
+      { imageIndex: 2, measure: '215/75R17.5', brand: 'Pirelli', value: 'R$00,00' },
+      { imageIndex: 3, measure: '11R22.5', brand: 'Michelin', value: 'R$00,00' },
+      { imageIndex: 4, measure: '235/75R17.5', brand: 'Continental', value: 'R$00,00' },
+      { imageIndex: 5, measure: '225/75R16', brand: 'Firestone', value: 'R$00,00' },
+    ],
+  },
+  {
+    id: 'recapados',
+    eyebrow: 'Pneu recapado',
+    title: 'Pneus recapados',
+    description: 'Alternativas revisadas para reduzir custo por quilometro na sua frota.',
+    layout: 'grid',
+    items: [
+      { imageIndex: 6, measure: '295/80R22.5', brand: 'Banda borrachuda', value: 'R$00,00' },
+      { imageIndex: 7, measure: '275/80R22.5', brand: 'Banda lisa', value: 'R$00,00' },
+      { imageIndex: 8, measure: '215/75R17.5', brand: 'Banda mista', value: 'R$00,00' },
+      { imageIndex: 9, measure: '11R22.5', brand: 'Banda direcional', value: 'R$00,00' },
+      { imageIndex: 10, measure: '235/75R17.5', brand: 'Banda regional', value: 'R$00,00' },
+      { imageIndex: 11, measure: '225/75R16', brand: 'Banda urbana', value: 'R$00,00' },
+    ],
+  },
+  {
+    id: 'recapagem',
+    eyebrow: 'Recapagem de pneus',
+    title: 'Recapagem de pneus',
+    description: 'Servicos de recapagem por medida para recuperar rendimento com seguranca.',
+    layout: 'recapagem',
+    items: [
+      { imageIndex: 2, measure: '295/80-22.5', brand: 'LISO', value: 'R$00,00' },
+      { imageIndex: 4, measure: '295/80-22.5', brand: 'MISTO', value: 'R$00,00' },
+      { imageIndex: 6, measure: '295/80-22.5', brand: 'BORRACHUDO', value: 'R$00,00' },
+      { imageIndex: 8, measure: '275/80-22.5', brand: 'LISO', value: 'R$00,00' },
+      { imageIndex: 10, measure: '275/80-22.5', brand: 'MISTO', value: 'R$00,00' },
+      { imageIndex: 0, measure: '275/80-22.5', brand: 'BORRACHUDO', value: 'R$00,00' },
+      { imageIndex: 1, measure: '11R22.5', brand: 'LISO', value: 'R$00,00' },
+      { imageIndex: 3, measure: '11R22.5', brand: 'MISTO', value: 'R$00,00' },
+      { imageIndex: 5, measure: '11R22.5', brand: 'BORRACHUDO', value: 'R$00,00' },
+    ],
+  },
+] as TireSlide[];
+
+function loadGalleryImages() {
+  try {
+    const savedImages = window.localStorage.getItem(galleryStorageKey);
+    if (!savedImages) {
+      return galleryImages;
+    }
+
+    return JSON.parse(savedImages) as GalleryImage[];
+  } catch {
+    return galleryImages;
+  }
+}
+
+function loadStores() {
+  try {
+    const savedStores = window.localStorage.getItem(storesStorageKey);
+    if (!savedStores) {
+      return defaultStores;
+    }
+
+    return JSON.parse(savedStores) as Store[];
+  } catch {
+    return defaultStores;
+  }
+}
+
+function loadTireShowcaseSlides() {
+  try {
+    const savedSlides = window.localStorage.getItem(tireStorageKey);
+    if (!savedSlides) {
+      return defaultTireShowcaseSlides;
+    }
+
+    return JSON.parse(savedSlides) as TireSlide[];
+  } catch {
+    return defaultTireShowcaseSlides;
+  }
+}
+
+function getItemImage(item: TireItem) {
+  return item.imageSrc || galleryImages[item.imageIndex % galleryImages.length]?.src;
+}
+
+function getStoreImage(store: Store) {
+  return store.imageSrc || galleryImages[0]?.src;
+}
+
+function getStoreSecondImage(store: Store) {
+  return store.imageSrcTwo || store.imageSrc || galleryImages[1]?.src || galleryImages[0]?.src;
+}
+
+function compressImageFile(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onerror = () => reject(reader.error);
+    reader.onload = () => {
+      const source = String(reader.result);
+      const image = new Image();
+
+      image.onerror = () => resolve(source);
+      image.onload = () => {
+        const maxSize = 1200;
+        const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
+        const width = Math.max(1, Math.round(image.width * scale));
+        const height = Math.max(1, Math.round(image.height * scale));
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+
+        if (!context) {
+          resolve(source);
+          return;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        context.drawImage(image, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      };
+
+      image.src = source;
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
 
 function App() {
   const isGalleryPage = window.location.pathname === '/galeria';
-  const [selectedStoreId, setSelectedStoreId] = useState<(typeof stores)[number]['id']>('piratininga');
-  const selectedStore = stores.find((store) => store.id === selectedStoreId) ?? stores[0];
+  const isEmployeePage = window.location.pathname === '/funcionario';
+  const [editableStores, setEditableStores] = useState<Store[]>(loadStores);
+  const [editableGalleryImages, setEditableGalleryImages] = useState<GalleryImage[]>(loadGalleryImages);
+  const [selectedStoreId, setSelectedStoreId] = useState('piratininga');
+  const [tireShowcaseSlides, setTireShowcaseSlides] = useState<TireSlide[]>(loadTireShowcaseSlides);
+  const [activeTireSlide, setActiveTireSlide] = useState(0);
+  const [isTireShowcasePinned, setIsTireShowcasePinned] = useState(false);
+  const [activeEmployeeSection, setActiveEmployeeSection] = useState<'pneus' | 'galeria' | 'enderecos'>('pneus');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [typedEmployeePassword, setTypedEmployeePassword] = useState('');
+  const [isEmployeeUnlocked, setIsEmployeeUnlocked] = useState(false);
+  const [employeeError, setEmployeeError] = useState('');
+  const selectedStore = editableStores.find((store) => store.id === selectedStoreId) ?? editableStores[0] ?? defaultStores[0];
+  const selectedTireSlide = tireShowcaseSlides[activeTireSlide];
   const selectedStoreMap = `https://www.google.com/maps?q=${encodeURIComponent(selectedStore.address)}&output=embed`;
   const selectedStoreWhatsapp = `https://wa.me/${selectedStore.whatsapp}?text=${encodeURIComponent(
     `Olá! Vim pela landing page e quero atendimento na ${selectedStore.name}.`,
   )}`;
+
+  const persistTireSlides = (nextSlides: TireSlide[]) => {
+    setTireShowcaseSlides(nextSlides);
+    setHasUnsavedChanges(true);
+  };
+
+  const updateTireItem = (slideIndex: number, itemIndex: number, field: keyof TireItem, value: string | number) => {
+    persistTireSlides(
+      tireShowcaseSlides.map((slide, currentSlideIndex) =>
+        currentSlideIndex === slideIndex
+          ? {
+              ...slide,
+              items: slide.items.map((item, currentItemIndex) =>
+                currentItemIndex === itemIndex ? { ...item, [field]: value } : item,
+              ),
+            }
+          : slide,
+      ),
+    );
+  };
+
+  const uploadTireImage = (slideIndex: number, itemIndex: number, file: File | null) => {
+    if (!file) {
+      return;
+    }
+
+    compressImageFile(file).then((imageSrc) => updateTireItem(slideIndex, itemIndex, 'imageSrc', imageSrc));
+  };
+
+  const addTireItem = (slideIndex: number) => {
+    const targetSlide = tireShowcaseSlides[slideIndex];
+    const nextItem: TireItem = {
+      imageIndex: targetSlide.items.length % Math.max(galleryImages.length, 1),
+      measure: targetSlide.layout === 'recapagem' ? '295/80-22.5' : 'Nova medida',
+      brand: targetSlide.layout === 'recapagem' ? 'LISO' : 'Nova marca',
+      value: 'R$00,00',
+    };
+
+    persistTireSlides(
+      tireShowcaseSlides.map((slide, currentSlideIndex) =>
+        currentSlideIndex === slideIndex ? { ...slide, items: [...slide.items, nextItem] } : slide,
+      ),
+    );
+  };
+
+  const removeTireItem = (slideIndex: number, itemIndex: number) => {
+    if (!window.confirm('Deseja mesmo excluir este quadro?')) {
+      return;
+    }
+
+    persistTireSlides(
+      tireShowcaseSlides.map((slide, currentSlideIndex) =>
+        currentSlideIndex === slideIndex
+          ? { ...slide, items: slide.items.filter((_, currentItemIndex) => currentItemIndex !== itemIndex) }
+          : slide,
+      ),
+    );
+  };
+
+  const unlockEmployeePage = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (typedEmployeePassword === employeePassword) {
+      setIsEmployeeUnlocked(true);
+      setEmployeeError('');
+      return;
+    }
+
+    setEmployeeError('Senha incorreta.');
+  };
+
+  const persistGalleryImages = (nextImages: GalleryImage[]) => {
+    setEditableGalleryImages(nextImages);
+    setHasUnsavedChanges(true);
+  };
+
+  const updateGalleryImage = (imageIndex: number, field: keyof GalleryImage, value: string) => {
+    persistGalleryImages(
+      editableGalleryImages.map((image, currentImageIndex) =>
+        currentImageIndex === imageIndex ? { ...image, [field]: value } : image,
+      ),
+    );
+  };
+
+  const uploadGalleryImage = (imageIndex: number, file: File | null) => {
+    if (!file) {
+      return;
+    }
+
+    compressImageFile(file).then((imageSrc) => updateGalleryImage(imageIndex, 'src', imageSrc));
+  };
+
+  const addGalleryImage = () => {
+    persistGalleryImages([
+      ...editableGalleryImages,
+      {
+        src: galleryImages[0]?.src ?? '',
+        alt: 'Nova foto da galeria',
+      },
+    ]);
+  };
+
+  const removeGalleryImage = (imageIndex: number) => {
+    if (!window.confirm('Deseja mesmo excluir esta foto da galeria?')) {
+      return;
+    }
+
+    persistGalleryImages(editableGalleryImages.filter((_, currentImageIndex) => currentImageIndex !== imageIndex));
+  };
+
+  const persistStores = (nextStores: Store[]) => {
+    setEditableStores(nextStores);
+    setHasUnsavedChanges(true);
+    if (!nextStores.some((store) => store.id === selectedStoreId)) {
+      setSelectedStoreId(nextStores[0]?.id ?? defaultStores[0].id);
+    }
+  };
+
+  const saveEmployeeChanges = () => {
+    try {
+      window.localStorage.setItem(tireStorageKey, JSON.stringify(tireShowcaseSlides));
+      window.localStorage.setItem(galleryStorageKey, JSON.stringify(editableGalleryImages));
+      window.localStorage.setItem(storesStorageKey, JSON.stringify(editableStores));
+      setHasUnsavedChanges(false);
+    } catch {
+      window.alert('Nao foi possivel salvar. Tente usar imagens menores.');
+    }
+  };
+
+  const updateStore = (storeIndex: number, field: keyof Store, value: string) => {
+    persistStores(
+      editableStores.map((store, currentStoreIndex) =>
+        currentStoreIndex === storeIndex ? { ...store, [field]: value } : store,
+      ),
+    );
+  };
+
+  const uploadStoreImage = (storeIndex: number, file: File | null) => {
+    if (!file) {
+      return;
+    }
+
+    compressImageFile(file).then((imageSrc) => updateStore(storeIndex, 'imageSrc', imageSrc));
+  };
+
+  const uploadStoreSecondImage = (storeIndex: number, file: File | null) => {
+    if (!file) {
+      return;
+    }
+
+    compressImageFile(file).then((imageSrc) => updateStore(storeIndex, 'imageSrcTwo', imageSrc));
+  };
+
+  const addStore = () => {
+    const nextStoreNumber = editableStores.length + 1;
+    persistStores([
+      ...editableStores,
+      {
+        id: `loja-${Date.now()}`,
+        name: `Nova loja ${nextStoreNumber}`,
+        address: 'Digite o endereco completo',
+        phone: '(11) 0000-0000',
+        whatsapp: '5511910729582',
+        imageSrc: galleryImages[0]?.src,
+        imageSrcTwo: galleryImages[1]?.src,
+      },
+    ]);
+  };
+
+  const removeStore = (storeIndex: number) => {
+    if (!window.confirm('Deseja mesmo excluir esta loja?')) {
+      return;
+    }
+
+    persistStores(editableStores.filter((_, currentStoreIndex) => currentStoreIndex !== storeIndex));
+  };
+
+  useEffect(() => {
+    if (isTireShowcasePinned) {
+      return undefined;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setActiveTireSlide((currentSlide) => (currentSlide + 1) % tireShowcaseSlides.length);
+    }, 10000);
+
+    return () => window.clearInterval(intervalId);
+  }, [isTireShowcasePinned]);
+
+  if (isEmployeePage) {
+    return (
+      <main className="site-shell employee-shell">
+        <header className="header">
+          <a className="brand" href="/" aria-label="Intercap Pneus">
+            <img className="brand-logo" src={logoImage} alt="Intercap Pneus" />
+          </a>
+
+          <nav className="nav" aria-label="Navegacao funcionario">
+            <a className="gallery-link" href="/">Voltar para o site</a>
+          </nav>
+        </header>
+
+        <section className="employee-page">
+          {!isEmployeeUnlocked ? (
+            <form className="employee-login" onSubmit={unlockEmployeePage}>
+              <Lock size={34} />
+              <h1>Acesso funcionario</h1>
+              <label>
+                Senha
+                <input
+                  type="password"
+                  value={typedEmployeePassword}
+                  onChange={(event) => setTypedEmployeePassword(event.target.value)}
+                  autoFocus
+                />
+              </label>
+              {employeeError && <p className="employee-error">{employeeError}</p>}
+              <button type="submit">
+                <Lock size={18} />
+                Entrar
+              </button>
+            </form>
+          ) : (
+            <div className="employee-editor">
+              <div className="employee-editor-heading">
+                <div>
+                  <span>Area interna</span>
+                  <h1>Painel de edicao</h1>
+                  <p>Depois de alterar, clique em Salvar alteracao para gravar neste navegador.</p>
+                </div>
+                <a className="employee-save-note" href="/">
+                  <Save size={18} />
+                  Ver no site
+                </a>
+              </div>
+
+              <div className="employee-section-tabs" role="tablist" aria-label="Escolher area para editar">
+                <button className={activeEmployeeSection === 'pneus' ? 'active' : ''} type="button" onClick={() => setActiveEmployeeSection('pneus')}>
+                  1. Pneus e valores
+                </button>
+                <button className={activeEmployeeSection === 'galeria' ? 'active' : ''} type="button" onClick={() => setActiveEmployeeSection('galeria')}>
+                  2. Galeria de fotos
+                </button>
+                <button className={activeEmployeeSection === 'enderecos' ? 'active' : ''} type="button" onClick={() => setActiveEmployeeSection('enderecos')}>
+                  3. Enderecos
+                </button>
+              </div>
+
+              {activeEmployeeSection === 'pneus' && tireShowcaseSlides.map((slide, slideIndex) => (
+                <section key={slide.id} className="employee-category">
+                  <div className="employee-category-heading">
+                    <div>
+                      <h2>{slideIndex + 1}. {slide.title}</h2>
+                      <p>{slide.layout === 'recapagem' ? 'Edite medida, tipo, imagem e valor.' : 'Edite medida, marca, imagem e valor.'}</p>
+                    </div>
+                    <button type="button" onClick={() => addTireItem(slideIndex)}>
+                      <Plus size={18} />
+                      Adicionar quadro
+                    </button>
+                  </div>
+
+                  <div className="employee-items-grid">
+                    {slide.items.map((item, itemIndex) => (
+                      <article key={`${slide.id}-${itemIndex}`} className="employee-item-card">
+                        <span className="employee-item-number">{itemIndex + 1}</span>
+                        <img src={getItemImage(item)} alt={item.brand || item.measure} />
+                        <div className="employee-item-fields">
+                          <label>
+                            Medida
+                            <input
+                              value={item.measure}
+                              onChange={(event) => updateTireItem(slideIndex, itemIndex, 'measure', event.target.value)}
+                            />
+                          </label>
+                          <label>
+                            {slide.layout === 'recapagem' ? 'Tipo' : 'Marca'}
+                            <input
+                              value={item.brand}
+                              onChange={(event) => updateTireItem(slideIndex, itemIndex, 'brand', event.target.value)}
+                            />
+                          </label>
+                          <label>
+                            Valor
+                            <input
+                              value={item.value}
+                              onChange={(event) => updateTireItem(slideIndex, itemIndex, 'value', event.target.value)}
+                            />
+                          </label>
+                          <div className="employee-upload-actions">
+                            <label className="employee-upload">
+                              <Upload size={17} />
+                              Tirar foto
+                              <input
+                                type="file"
+                                accept="image/*"
+                                capture="environment"
+                                onChange={(event) => uploadTireImage(slideIndex, itemIndex, event.target.files?.[0] ?? null)}
+                              />
+                            </label>
+                            <label className="employee-upload">
+                              <Upload size={17} />
+                              Escolher da galeria
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(event) => uploadTireImage(slideIndex, itemIndex, event.target.files?.[0] ?? null)}
+                              />
+                            </label>
+                          </div>
+                        </div>
+                        <button className="employee-remove" type="button" onClick={() => removeTireItem(slideIndex, itemIndex)}>
+                          <Trash2 size={17} />
+                          Remover
+                        </button>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              ))}
+
+              {activeEmployeeSection === 'galeria' && (
+                <section className="employee-category">
+                  <div className="employee-category-heading">
+                    <div>
+                      <h2>2. Galeria de fotos</h2>
+                      <p>Troque imagens, tire uma foto na hora ou remova fotos da galeria.</p>
+                    </div>
+                    <button type="button" onClick={addGalleryImage}>
+                      <Plus size={18} />
+                      Adicionar foto
+                    </button>
+                  </div>
+
+                  <div className="employee-gallery-grid">
+                    {editableGalleryImages.map((image, imageIndex) => (
+                      <article key={`${image.src}-${imageIndex}`} className="employee-gallery-card">
+                        <span className="employee-item-number">{imageIndex + 1}</span>
+                        <img src={image.src} alt={image.alt} />
+                        <label>
+                          Nome/descricao da foto
+                          <input value={image.alt} onChange={(event) => updateGalleryImage(imageIndex, 'alt', event.target.value)} />
+                        </label>
+                        <div className="employee-upload-actions">
+                          <label className="employee-upload">
+                            <Upload size={17} />
+                            Tirar foto
+                            <input
+                              type="file"
+                              accept="image/*"
+                              capture="environment"
+                              onChange={(event) => uploadGalleryImage(imageIndex, event.target.files?.[0] ?? null)}
+                            />
+                          </label>
+                          <label className="employee-upload">
+                            <Upload size={17} />
+                            Escolher da galeria
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(event) => uploadGalleryImage(imageIndex, event.target.files?.[0] ?? null)}
+                            />
+                          </label>
+                        </div>
+                        <button className="employee-remove" type="button" onClick={() => removeGalleryImage(imageIndex)}>
+                          <Trash2 size={17} />
+                          Remover foto
+                        </button>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {activeEmployeeSection === 'enderecos' && (
+                <section className="employee-category">
+                  <div className="employee-category-heading">
+                    <div>
+                      <h2>3. Enderecos</h2>
+                      <p>Edite as lojas existentes ou adicione uma nova unidade.</p>
+                    </div>
+                    <button type="button" onClick={addStore}>
+                      <Plus size={18} />
+                      Adicionar loja
+                    </button>
+                  </div>
+
+                  <div className="employee-store-grid">
+                    {editableStores.map((store, storeIndex) => (
+                      <article key={store.id} className="employee-store-card">
+                        <span className="employee-item-number">{storeIndex + 1}</span>
+                        <div className="employee-store-images">
+                          <img className="employee-store-image" src={getStoreImage(store)} alt={`${store.name} imagem 1`} />
+                          <img className="employee-store-image" src={getStoreSecondImage(store)} alt={`${store.name} imagem 2`} />
+                        </div>
+                        <label>
+                          Nome da loja
+                          <input value={store.name} onChange={(event) => updateStore(storeIndex, 'name', event.target.value)} />
+                        </label>
+                        <label>
+                          Endereco completo
+                          <input value={store.address} onChange={(event) => updateStore(storeIndex, 'address', event.target.value)} />
+                        </label>
+                        <label>
+                          Telefone
+                          <input value={store.phone} onChange={(event) => updateStore(storeIndex, 'phone', event.target.value)} />
+                        </label>
+                        <label>
+                          WhatsApp com codigo do pais
+                          <input value={store.whatsapp} onChange={(event) => updateStore(storeIndex, 'whatsapp', event.target.value)} />
+                        </label>
+                        <div className="employee-store-upload-group">
+                          <span>Imagem 1</span>
+                          <div className="employee-upload-actions">
+                            <label className="employee-upload">
+                              <Upload size={17} />
+                              Tirar foto
+                              <input
+                                type="file"
+                                accept="image/*"
+                                capture="environment"
+                                onChange={(event) => uploadStoreImage(storeIndex, event.target.files?.[0] ?? null)}
+                              />
+                            </label>
+                            <label className="employee-upload">
+                              <Upload size={17} />
+                              Escolher da galeria
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(event) => uploadStoreImage(storeIndex, event.target.files?.[0] ?? null)}
+                              />
+                            </label>
+                          </div>
+                        </div>
+                        <div className="employee-store-upload-group">
+                          <span>Imagem 2</span>
+                          <div className="employee-upload-actions">
+                            <label className="employee-upload">
+                              <Upload size={17} />
+                              Tirar foto
+                              <input
+                                type="file"
+                                accept="image/*"
+                                capture="environment"
+                                onChange={(event) => uploadStoreSecondImage(storeIndex, event.target.files?.[0] ?? null)}
+                              />
+                            </label>
+                            <label className="employee-upload">
+                              <Upload size={17} />
+                              Escolher da galeria
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(event) => uploadStoreSecondImage(storeIndex, event.target.files?.[0] ?? null)}
+                              />
+                            </label>
+                          </div>
+                        </div>
+                        <button className="employee-remove" type="button" onClick={() => removeStore(storeIndex)}>
+                          <Trash2 size={17} />
+                          Remover loja
+                        </button>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </div>
+          )}
+        </section>
+        {isEmployeeUnlocked && hasUnsavedChanges && (
+          <button className="employee-floating-save" type="button" onClick={saveEmployeeChanges}>
+            <Save size={19} />
+            Salvar alteracao
+          </button>
+        )}
+      </main>
+    );
+  }
 
   if (isGalleryPage) {
     return (
@@ -76,9 +761,9 @@ function App() {
             <h1>Galeria de Fotos Intercap Pneus</h1>
           </div>
 
-          {galleryImages.length > 0 ? (
+          {editableGalleryImages.length > 0 ? (
             <div className="gallery-grid">
-              {galleryImages.map((image) => (
+              {editableGalleryImages.map((image) => (
                 <figure key={image.src} className="gallery-item">
                   <img src={image.src} alt={image.alt} loading="lazy" />
                 </figure>
@@ -172,9 +857,91 @@ function App() {
         </div>
       </section>
 
+      <section className="tire-showcase" aria-labelledby="tire-showcase-title">
+        <div className="tire-showcase-heading">
+          <div>
+            <span>{selectedTireSlide.eyebrow}</span>
+            <h2 id="tire-showcase-title">{selectedTireSlide.title}</h2>
+            <p>{selectedTireSlide.description}</p>
+          </div>
+
+          <div className="showcase-tabs" role="tablist" aria-label="Selecionar tipo de pneu">
+            {tireShowcaseSlides.map((slide, slideIndex) => (
+              <button
+                key={slide.id}
+                className={slideIndex === activeTireSlide ? 'active' : ''}
+                type="button"
+                role="tab"
+                aria-selected={slideIndex === activeTireSlide}
+                onClick={() => {
+                  setActiveTireSlide(slideIndex);
+                  setIsTireShowcasePinned(true);
+                }}
+              >
+                {slide.title}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className={`showcase-panel showcase-panel-${selectedTireSlide.layout}`}>
+          {selectedTireSlide.layout === 'recapagem' ? (
+            <div className="recapage-mural">
+              {Array.from(new Set(selectedTireSlide.items.map((item) => item.measure))).map((measure) => (
+                <div key={measure} className="recapage-row">
+                  <h3>{measure}</h3>
+                  <div className="price-mural">
+                    {selectedTireSlide.items
+                      .filter((item) => item.measure === measure)
+                      .map((item) => {
+                        const imageSrc = getItemImage(item);
+                        const imageAlt = galleryImages[item.imageIndex % galleryImages.length]?.alt ?? item.brand;
+
+                        return (
+                          <article key={`${selectedTireSlide.id}-${item.measure}-${item.brand}`} className="price-card recapage-card">
+                            <img className="price-card-image" src={imageSrc} alt={imageAlt} loading="lazy" />
+                            <div className="price-card-copy">
+                              <strong>{item.brand}</strong>
+                              <em>{item.value}</em>
+                            </div>
+                            <a className="price-whatsapp" href={whatsappUrl} target="_blank" rel="noreferrer">
+                              CHAME AGORA!
+                            </a>
+                          </article>
+                        );
+                      })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+          <div className="price-mural">
+            {selectedTireSlide.items.map((item) => {
+              const imageSrc = getItemImage(item);
+              const imageAlt = galleryImages[item.imageIndex % galleryImages.length]?.alt ?? item.brand;
+
+              return (
+                <article key={`${selectedTireSlide.id}-${item.measure}-${item.brand}`} className="price-card">
+                  <img className="price-card-image" src={imageSrc} alt={imageAlt} loading="lazy" />
+                  <div className="price-card-copy">
+                    <strong>{item.measure}</strong>
+                    <span>{item.brand}</span>
+                    <em>{item.value}</em>
+                  </div>
+                  <a className="price-whatsapp" href={whatsappUrl} target="_blank" rel="noreferrer">
+                    CHAME AGORA!
+                  </a>
+                </article>
+              );
+            })}
+          </div>
+          )}
+        </div>
+      </section>
+
       <section id="contato" className="contact-band">
         <div>
-          <h2>Chame agora e encontre o pneu certo para o seu caminhão.</h2>
+          <h2>CHAME AGORA E ENCONTRE O PNEU CERTO PARA O SEU CAMINHÃO.</h2>
         </div>
         <a className="primary-button contact-button" href={whatsappUrl} target="_blank" rel="noreferrer">
           <MessageCircle size={22} />
@@ -187,7 +954,7 @@ function App() {
           <h2>ONDE ESTAMOS:</h2>
 
           <div className="store-tabs" role="tablist" aria-label="Selecionar unidade">
-            {stores.map((store) => (
+            {editableStores.map((store) => (
               <button
                 key={store.id}
                 className={store.id === selectedStore.id ? 'active' : ''}
@@ -225,6 +992,14 @@ function App() {
             referrerPolicy="no-referrer-when-downgrade"
           />
         </div>
+
+        <figure className="selected-store-photo">
+          <div className="selected-store-photo-grid">
+            <img src={getStoreImage(selectedStore)} alt={`Foto 1 ${selectedStore.name}`} loading="lazy" />
+            <img src={getStoreSecondImage(selectedStore)} alt={`Foto 2 ${selectedStore.name}`} loading="lazy" />
+          </div>
+          <figcaption>{selectedStore.name}</figcaption>
+        </figure>
       </section>
 
       <footer className="footer">
@@ -246,6 +1021,7 @@ function App() {
           <div className="footer-credit">
             Developed by <strong>Gustavo Curis de Francisco</strong>
           </div>
+          <a className="employee-access-link" href="/funcionario">Acesso funcionario</a>
         </div>
       </footer>
       <a className="floating-whatsapp" href={whatsappUrl} target="_blank" rel="noreferrer" aria-label="Falar no WhatsApp">
