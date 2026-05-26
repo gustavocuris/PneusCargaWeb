@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import {
   ArrowRight,
@@ -95,10 +95,17 @@ type TireSlide = {
   items: TireItem[];
 };
 
+type SiteContent = {
+  tireShowcaseSlides: TireSlide[];
+  galleryImages: GalleryImage[];
+  stores: Store[];
+};
+
 const tireStorageKey = 'intercap-tire-showcase';
 const galleryStorageKey = 'intercap-gallery-images';
 const storesStorageKey = 'intercap-stores';
 const employeePassword = 'IPN@2026';
+const siteContentApi = '/api/site-content';
 
 const defaultTireShowcaseSlides: TireSlide[] = [
   {
@@ -190,6 +197,20 @@ function loadTireShowcaseSlides() {
   }
 }
 
+function getCurrentSiteContent(tireShowcaseSlides: TireSlide[], editableGalleryImages: GalleryImage[], editableStores: Store[]) {
+  return {
+    tireShowcaseSlides,
+    galleryImages: editableGalleryImages,
+    stores: editableStores,
+  };
+}
+
+function persistLocalContent(content: SiteContent) {
+  window.localStorage.setItem(tireStorageKey, JSON.stringify(content.tireShowcaseSlides));
+  window.localStorage.setItem(galleryStorageKey, JSON.stringify(content.galleryImages));
+  window.localStorage.setItem(storesStorageKey, JSON.stringify(content.stores));
+}
+
 function getItemImage(item: TireItem) {
   return item.imageSrc || galleryImages[item.imageIndex % galleryImages.length]?.src;
 }
@@ -252,12 +273,39 @@ function App() {
   const [typedEmployeePassword, setTypedEmployeePassword] = useState('');
   const [isEmployeeUnlocked, setIsEmployeeUnlocked] = useState(false);
   const [employeeError, setEmployeeError] = useState('');
+  const [saveStatus, setSaveStatus] = useState('');
   const selectedStore = editableStores.find((store) => store.id === selectedStoreId) ?? editableStores[0] ?? defaultStores[0];
-  const selectedTireSlide = tireShowcaseSlides[activeTireSlide];
+  const selectedTireSlide = tireShowcaseSlides[activeTireSlide] ?? tireShowcaseSlides[0] ?? defaultTireShowcaseSlides[0];
   const selectedStoreMap = `https://www.google.com/maps?q=${encodeURIComponent(selectedStore.address)}&output=embed`;
   const selectedStoreWhatsapp = `https://wa.me/${selectedStore.whatsapp}?text=${encodeURIComponent(
     `Olá! Vim pela landing page e quero atendimento na ${selectedStore.name}.`,
   )}`;
+
+  const applySiteContent = useCallback((content: SiteContent) => {
+    setTireShowcaseSlides(content.tireShowcaseSlides);
+    setEditableGalleryImages(content.galleryImages);
+    setEditableStores(content.stores);
+    persistLocalContent(content);
+  }, []);
+
+  const loadOnlineContent = useCallback(async () => {
+    try {
+      const response = await fetch(siteContentApi, { cache: 'no-store' });
+
+      if (response.status === 404) {
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error('Nao foi possivel carregar os dados online.');
+      }
+
+      const content = (await response.json()) as SiteContent;
+      applySiteContent(content);
+    } catch {
+      setSaveStatus('Modo offline: usando dados salvos neste aparelho.');
+    }
+  }, [applySiteContent]);
 
   const persistTireSlides = (nextSlides: TireSlide[]) => {
     setTireShowcaseSlides(nextSlides);
@@ -376,14 +424,36 @@ function App() {
     }
   };
 
-  const saveEmployeeChanges = () => {
+  const saveEmployeeChanges = async () => {
+    const content = getCurrentSiteContent(tireShowcaseSlides, editableGalleryImages, editableStores);
+
     try {
-      window.localStorage.setItem(tireStorageKey, JSON.stringify(tireShowcaseSlides));
-      window.localStorage.setItem(galleryStorageKey, JSON.stringify(editableGalleryImages));
-      window.localStorage.setItem(storesStorageKey, JSON.stringify(editableStores));
+      setSaveStatus('Salvando para todos...');
+      const response = await fetch(siteContentApi, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Employee-Password': employeePassword,
+        },
+        body: JSON.stringify(content),
+      });
+
+      if (!response.ok) {
+        throw new Error('Nao foi possivel salvar online.');
+      }
+
+      persistLocalContent(content);
       setHasUnsavedChanges(false);
+      setSaveStatus('Alteracao salva para todos os visitantes.');
     } catch {
-      window.alert('Nao foi possivel salvar. Tente usar imagens menores.');
+      try {
+        persistLocalContent(content);
+      } catch {
+        window.alert('Nao foi possivel salvar. Tente usar imagens menores.');
+        return;
+      }
+
+      setSaveStatus('Nao foi possivel salvar online. Verifique o armazenamento da Cloudflare.');
     }
   };
 
@@ -445,7 +515,23 @@ function App() {
     }, 10000);
 
     return () => window.clearInterval(intervalId);
-  }, [isTireShowcasePinned]);
+  }, [isTireShowcasePinned, tireShowcaseSlides.length]);
+
+  useEffect(() => {
+    loadOnlineContent();
+  }, [loadOnlineContent]);
+
+  useEffect(() => {
+    if (isEmployeePage && hasUnsavedChanges) {
+      return undefined;
+    }
+
+    const intervalId = window.setInterval(() => {
+      loadOnlineContent();
+    }, 15000);
+
+    return () => window.clearInterval(intervalId);
+  }, [hasUnsavedChanges, isEmployeePage, loadOnlineContent]);
 
   if (isEmployeePage) {
     return (
@@ -486,7 +572,8 @@ function App() {
                 <div>
                   <span>Area interna</span>
                   <h1>Painel de edicao</h1>
-                  <p>Depois de alterar, clique em Salvar alteracao para gravar neste navegador.</p>
+                  <p>Depois de alterar, clique em Salvar alteracao para publicar para todos.</p>
+                  {saveStatus && <p className="employee-save-status">{saveStatus}</p>}
                 </div>
                 <a className="employee-save-note" href="/">
                   <Save size={18} />
