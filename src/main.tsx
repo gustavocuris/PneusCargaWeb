@@ -178,7 +178,9 @@ function loadStores() {
       return defaultStores;
     }
 
-    return JSON.parse(savedStores) as Store[];
+    return (JSON.parse(savedStores) as Store[]).map((store) =>
+      store.name === 'Loja Novo Osasco' ? { ...store, name: 'Loja Vila Osasco' } : store,
+    );
   } catch {
     return defaultStores;
   }
