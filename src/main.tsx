@@ -1105,11 +1105,11 @@ function App() {
         <div className="footer-meta">
           <div className="footer-pill">
             <ShieldCheck size={17} />
-            Security, trust and performance
+            Segurança, confiança e performance
           </div>
           <div className="footer-pill">
             <MapPin size={17} />
-            Heavy-duty tire service in Osasco
+            Atendimento em pneus de carga em Osasco
           </div>
           <div className="footer-credit">
             Developed by <strong>Gustavo Curis de Francisco</strong>

@@ -750,6 +750,7 @@ a {
   max-width: 680px;
   font-size: clamp(1.95rem, 3.4vw, 3.6rem);
   text-align: center;
+  white-space: nowrap;
 }
 
 .store-tabs {
@@ -1780,6 +1781,7 @@ a {
 
   .locations-copy h2 {
     font-size: clamp(2.35rem, 11vw, 3.4rem);
+    white-space: normal;
   }
 
   .map-panel,
