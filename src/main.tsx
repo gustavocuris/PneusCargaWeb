@@ -906,9 +906,9 @@ function App() {
           </p>
 
           <div className="hero-actions">
-            <a className="primary-button title-button" href={whatsappUrl} target="_blank" rel="noreferrer">
+            <a className="primary-button title-button" href="#unidades">
               <MessageCircle size={22} />
-              Falar no WhatsApp
+              Conhecer lojas e falar com atendente
               <ArrowRight size={20} />
             </a>
             <div className="quick-proof">
