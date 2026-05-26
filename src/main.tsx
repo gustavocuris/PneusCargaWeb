@@ -908,7 +908,11 @@ function App() {
           <div className="hero-actions">
             <a className="primary-button title-button" href="#unidades">
               <MessageCircle size={22} />
-              <span>Conhecer lojas e falar com atendente</span>
+              <span>
+                Conheca as nossas lojas e
+                <br />
+                fale com nossos atendentes
+              </span>
               <ArrowRight size={20} />
             </a>
             <div className="quick-proof">
@@ -1111,9 +1115,6 @@ function App() {
           <a className="employee-access-link" href="/funcionario">Acesso funcionario</a>
         </div>
       </footer>
-      <a className="floating-whatsapp" href={whatsappUrl} target="_blank" rel="noreferrer" aria-label="Falar no WhatsApp">
-        <MessageCircle size={30} />
-      </a>
     </main>
   );
 }
