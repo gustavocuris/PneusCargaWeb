@@ -726,6 +726,7 @@ a {
 }
 
 .locations-section {
+  scroll-margin-top: 88px;
   display: grid;
   grid-template-columns: minmax(320px, 0.82fr) minmax(420px, 1.18fr);
   gap: clamp(24px, 5vw, 70px);
