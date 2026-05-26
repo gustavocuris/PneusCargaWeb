@@ -908,7 +908,7 @@ function App() {
           <div className="hero-actions">
             <a className="primary-button title-button" href="#unidades">
               <MessageCircle size={22} />
-              Conhecer lojas e falar com atendente
+              <span>Conhecer lojas e falar com atendente</span>
               <ArrowRight size={20} />
             </a>
             <div className="quick-proof">
