@@ -69,7 +69,7 @@ const defaultStores: Store[] = [
   },
   {
     id: 'novo-osasco',
-    name: 'Loja Novo Osasco',
+    name: 'Loja Vila Osasco',
     address: 'Av. Visc. de Nova Granada, 42A - Vila Osasco, Osasco - SP',
     phone: '(11) 3683-4125',
     whatsapp: '551136834125',
@@ -1042,7 +1042,7 @@ function App() {
 
       <section id="unidades" className="locations-section">
         <div className="locations-copy">
-          <h2>ONDE ESTAMOS:</h2>
+          <h2>2 ENDEREÇOS EM OSASCO:</h2>
 
           <div className="store-tabs" role="tablist" aria-label="Selecionar unidade">
             {editableStores.map((store) => (
@@ -1069,7 +1069,7 @@ function App() {
             </p>
             <a className="primary-button store-button" href={selectedStoreWhatsapp} target="_blank" rel="noreferrer">
               <MessageCircle size={21} />
-              Chamar esta loja
+              WhatsApp da loja
               <ArrowRight size={19} />
             </a>
           </div>
