@@ -746,9 +746,9 @@ a {
 }
 
 .locations-copy h2 {
-  width: min(560px, 100%);
-  max-width: 680px;
-  font-size: clamp(1.95rem, 3.4vw, 3.6rem);
+  width: min(520px, 100%);
+  max-width: 520px;
+  font-size: clamp(1.75rem, 2.65vw, 2.85rem);
   text-align: center;
   white-space: nowrap;
 }
