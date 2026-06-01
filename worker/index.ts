@@ -24,6 +24,10 @@ function jsonResponse(data: unknown, init?: ResponseInit) {
 }
 
 function isValidContent(content: SiteContent) {
+  if (!content || typeof content !== 'object') {
+    return false;
+  }
+
   return (
     Array.isArray(content.tireShowcaseSlides) &&
     Array.isArray(content.galleryImages) &&
@@ -58,7 +62,13 @@ export default {
         return jsonResponse({ message: 'Unauthorized.' }, { status: 401 });
       }
 
-      const content = (await request.json()) as SiteContent;
+      let content: SiteContent;
+
+      try {
+        content = (await request.json()) as SiteContent;
+      } catch {
+        return jsonResponse({ message: 'Invalid JSON.' }, { status: 400 });
+      }
 
       if (!isValidContent(content)) {
         return jsonResponse({ message: 'Invalid site content.' }, { status: 400 });

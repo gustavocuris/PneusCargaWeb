@@ -106,6 +106,7 @@ const galleryStorageKey = 'intercap-gallery-images';
 const storesStorageKey = 'intercap-stores';
 const employeePassword = 'IPN@2026';
 const siteContentApi = '/api/site-content';
+const maxOnlineContentSize = 20 * 1024 * 1024;
 
 const defaultTireShowcaseSlides: TireSlide[] = [
   {
@@ -236,7 +237,7 @@ function compressImageFile(file: File) {
 
       image.onerror = () => resolve(source);
       image.onload = () => {
-        const maxSize = 1200;
+        const maxSize = 900;
         const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
         const width = Math.max(1, Math.round(image.width * scale));
         const height = Math.max(1, Math.round(image.height * scale));
@@ -251,7 +252,7 @@ function compressImageFile(file: File) {
         canvas.width = width;
         canvas.height = height;
         context.drawImage(image, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.82));
+        resolve(canvas.toDataURL('image/jpeg', 0.72));
       };
 
       image.src = source;
@@ -259,6 +260,15 @@ function compressImageFile(file: File) {
 
     reader.readAsDataURL(file);
   });
+}
+
+async function readApiError(response: Response) {
+  try {
+    const error = (await response.json()) as { message?: string };
+    return error.message || `Erro ${response.status}`;
+  } catch {
+    return `Erro ${response.status}`;
+  }
 }
 
 function App() {
@@ -299,13 +309,17 @@ function App() {
       }
 
       if (!response.ok) {
-        throw new Error('Nao foi possivel carregar os dados online.');
+        throw new Error(await readApiError(response));
       }
 
       const content = (await response.json()) as SiteContent;
       applySiteContent(content);
-    } catch {
-      setSaveStatus('Modo offline: usando dados salvos neste aparelho.');
+    } catch (error) {
+      setSaveStatus(
+        error instanceof Error && error.message.includes('SITE_CONTENT')
+          ? 'Modo offline: o armazenamento online SITE_CONTENT ainda nao esta conectado no Cloudflare.'
+          : 'Modo offline: usando dados salvos neste aparelho.',
+      );
     }
   }, [applySiteContent]);
 
@@ -428,8 +442,14 @@ function App() {
 
   const saveEmployeeChanges = async () => {
     const content = getCurrentSiteContent(tireShowcaseSlides, editableGalleryImages, editableStores);
+    const body = JSON.stringify(content);
+    const bodySize = new Blob([body]).size;
 
     try {
+      if (bodySize > maxOnlineContentSize) {
+        throw new Error('As imagens ficaram grandes demais para salvar online. Tente usar fotos menores.');
+      }
+
       setSaveStatus('Salvando para todos...');
       const response = await fetch(siteContentApi, {
         method: 'PUT',
@@ -437,17 +457,17 @@ function App() {
           'Content-Type': 'application/json',
           'X-Employee-Password': employeePassword,
         },
-        body: JSON.stringify(content),
+        body,
       });
 
       if (!response.ok) {
-        throw new Error('Nao foi possivel salvar online.');
+        throw new Error(await readApiError(response));
       }
 
       persistLocalContent(content);
       setHasUnsavedChanges(false);
       setSaveStatus('Alteracao salva para todos os visitantes.');
-    } catch {
+    } catch (error) {
       try {
         persistLocalContent(content);
       } catch {
@@ -455,7 +475,13 @@ function App() {
         return;
       }
 
-      setSaveStatus('Nao foi possivel salvar online. Verifique o armazenamento da Cloudflare.');
+      setSaveStatus(
+        error instanceof Error && error.message.includes('SITE_CONTENT')
+          ? 'Nao foi possivel salvar online: conecte o KV SITE_CONTENT no Cloudflare e publique novamente.'
+          : error instanceof Error
+            ? error.message
+            : 'Nao foi possivel salvar online. Verifique o armazenamento da Cloudflare.',
+      );
     }
   };
 
