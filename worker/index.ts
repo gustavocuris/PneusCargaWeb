@@ -7,6 +7,7 @@ type SiteContent = {
 type Env = {
   ASSETS: Fetcher;
   SITE_CONTENT?: KVNamespace;
+  [binding: string]: Fetcher | KVNamespace | undefined;
 };
 
 const contentKey = 'site-content';
@@ -35,16 +36,21 @@ function isValidContent(content: SiteContent) {
   );
 }
 
+function getSiteContentNamespace(env: Env) {
+  return env.SITE_CONTENT ?? Object.entries(env).find(([bindingName]) => bindingName.trim() === 'SITE_CONTENT')?.[1];
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+    const siteContent = getSiteContentNamespace(env) as KVNamespace | undefined;
 
     if (url.pathname === '/api/site-content' && request.method === 'GET') {
-      if (!env.SITE_CONTENT) {
+      if (!siteContent) {
         return jsonResponse({ message: 'SITE_CONTENT KV binding missing.' }, { status: 503 });
       }
 
-      const content = await env.SITE_CONTENT.get(contentKey, 'json');
+      const content = await siteContent.get(contentKey, 'json');
 
       if (!content) {
         return jsonResponse({ message: 'No saved content yet.' }, { status: 404 });
@@ -54,7 +60,7 @@ export default {
     }
 
     if (url.pathname === '/api/site-content' && request.method === 'PUT') {
-      if (!env.SITE_CONTENT) {
+      if (!siteContent) {
         return jsonResponse({ message: 'SITE_CONTENT KV binding missing.' }, { status: 503 });
       }
 
@@ -74,7 +80,7 @@ export default {
         return jsonResponse({ message: 'Invalid site content.' }, { status: 400 });
       }
 
-      await env.SITE_CONTENT.put(contentKey, JSON.stringify(content));
+      await siteContent.put(contentKey, JSON.stringify(content));
       return jsonResponse({ ok: true });
     }
 
