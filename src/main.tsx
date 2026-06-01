@@ -980,7 +980,7 @@ function App() {
         <div className="hero-content">
           <div className="eyebrow">
             <ShieldCheck size={18} />
-            <span>Especialistas em pneus a mais de 35 anos</span>
+            <span>Especialistas em pneus a mais de 30 anos</span>
           </div>
 
           <div className="hero-title-row">
