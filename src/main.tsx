@@ -351,6 +351,26 @@ function App() {
     compressImageFile(file).then((imageSrc) => updateTireItem(slideIndex, itemIndex, 'imageSrc', imageSrc));
   };
 
+  const getDroppedImageFile = (event: React.DragEvent<HTMLElement>) => {
+    event.preventDefault();
+    const file = Array.from(event.dataTransfer.files).find((droppedFile) => droppedFile.type.startsWith('image/'));
+
+    if (!file) {
+      setSaveStatus('Arraste apenas arquivos de imagem.');
+    }
+
+    return file ?? null;
+  };
+
+  const allowImageDrop = (event: React.DragEvent<HTMLElement>) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+  };
+
+  const dropTireImage = (event: React.DragEvent<HTMLElement>, slideIndex: number, itemIndex: number) => {
+    uploadTireImage(slideIndex, itemIndex, getDroppedImageFile(event));
+  };
+
   const addTireItem = (slideIndex: number) => {
     const targetSlide = tireShowcaseSlides[slideIndex];
     const nextItem: TireItem = {
@@ -412,6 +432,10 @@ function App() {
     }
 
     compressImageFile(file).then((imageSrc) => updateGalleryImage(imageIndex, 'src', imageSrc));
+  };
+
+  const dropGalleryImage = (event: React.DragEvent<HTMLElement>, imageIndex: number) => {
+    uploadGalleryImage(imageIndex, getDroppedImageFile(event));
   };
 
   const addGalleryImage = () => {
@@ -501,12 +525,20 @@ function App() {
     compressImageFile(file).then((imageSrc) => updateStore(storeIndex, 'imageSrc', imageSrc));
   };
 
+  const dropStoreImage = (event: React.DragEvent<HTMLElement>, storeIndex: number) => {
+    uploadStoreImage(storeIndex, getDroppedImageFile(event));
+  };
+
   const uploadStoreSecondImage = (storeIndex: number, file: File | null) => {
     if (!file) {
       return;
     }
 
     compressImageFile(file).then((imageSrc) => updateStore(storeIndex, 'imageSrcTwo', imageSrc));
+  };
+
+  const dropStoreSecondImage = (event: React.DragEvent<HTMLElement>, storeIndex: number) => {
+    uploadStoreSecondImage(storeIndex, getDroppedImageFile(event));
   };
 
   const addStore = () => {
@@ -638,7 +670,14 @@ function App() {
                     {slide.items.map((item, itemIndex) => (
                       <article key={`${slide.id}-${itemIndex}`} className="employee-item-card">
                         <span className="employee-item-number">{itemIndex + 1}</span>
-                        <img src={getItemImage(item)} alt={item.brand || item.measure} />
+                        <div
+                          className="employee-image-dropzone employee-tire-dropzone"
+                          onDragOver={allowImageDrop}
+                          onDrop={(event) => dropTireImage(event, slideIndex, itemIndex)}
+                        >
+                          <img src={getItemImage(item)} alt={item.brand || item.measure} />
+                          <span>Arraste a imagem aqui</span>
+                        </div>
                         <div className="employee-item-fields">
                           <label>
                             Medida
@@ -710,7 +749,14 @@ function App() {
                     {editableGalleryImages.map((image, imageIndex) => (
                       <article key={`${image.src}-${imageIndex}`} className="employee-gallery-card">
                         <span className="employee-item-number">{imageIndex + 1}</span>
-                        <img src={image.src} alt={image.alt} />
+                        <div
+                          className="employee-image-dropzone employee-gallery-dropzone"
+                          onDragOver={allowImageDrop}
+                          onDrop={(event) => dropGalleryImage(event, imageIndex)}
+                        >
+                          <img src={image.src} alt={image.alt} />
+                          <span>Arraste a imagem aqui</span>
+                        </div>
                         <label>
                           Nome/descricao da foto
                           <input value={image.alt} onChange={(event) => updateGalleryImage(imageIndex, 'alt', event.target.value)} />
@@ -764,8 +810,22 @@ function App() {
                       <article key={store.id} className="employee-store-card">
                         <span className="employee-item-number">{storeIndex + 1}</span>
                         <div className="employee-store-images">
-                          <img className="employee-store-image" src={getStoreImage(store)} alt={`${store.name} imagem 1`} />
-                          <img className="employee-store-image" src={getStoreSecondImage(store)} alt={`${store.name} imagem 2`} />
+                          <div
+                            className="employee-image-dropzone employee-store-dropzone"
+                            onDragOver={allowImageDrop}
+                            onDrop={(event) => dropStoreImage(event, storeIndex)}
+                          >
+                            <img className="employee-store-image" src={getStoreImage(store)} alt={`${store.name} imagem 1`} />
+                            <span>Imagem 1</span>
+                          </div>
+                          <div
+                            className="employee-image-dropzone employee-store-dropzone"
+                            onDragOver={allowImageDrop}
+                            onDrop={(event) => dropStoreSecondImage(event, storeIndex)}
+                          >
+                            <img className="employee-store-image" src={getStoreSecondImage(store)} alt={`${store.name} imagem 2`} />
+                            <span>Imagem 2</span>
+                          </div>
                         </div>
                         <label>
                           Nome da loja

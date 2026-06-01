@@ -1179,11 +1179,51 @@ a {
   font-weight: 950;
 }
 
-.employee-item-card img {
+.employee-image-dropzone {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border: 1px dashed rgba(86, 255, 154, 0.42);
+  border-radius: 8px;
+  background: rgba(86, 255, 154, 0.06);
+}
+
+.employee-image-dropzone img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 7px;
+}
+
+.employee-image-dropzone span {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  left: 6px;
+  display: grid;
+  min-height: 24px;
+  place-items: center;
+  border-radius: 6px;
+  color: #07140c;
+  background: rgba(86, 255, 154, 0.9);
+  font-size: 0.62rem;
+  font-weight: 950;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.employee-image-dropzone:hover,
+.employee-image-dropzone:focus-within {
+  border-color: rgba(86, 255, 154, 0.86);
+  box-shadow: 0 0 0 3px rgba(86, 255, 154, 0.12);
+}
+
+.employee-tire-dropzone {
   width: 132px;
   height: 132px;
-  object-fit: cover;
-  border-radius: 8px;
 }
 
 .employee-item-fields {
@@ -1237,12 +1277,8 @@ a {
   background: rgba(4, 8, 12, 0.46);
 }
 
-.employee-gallery-card img {
-  display: block;
-  width: 100%;
+.employee-gallery-dropzone {
   aspect-ratio: 4 / 3;
-  object-fit: cover;
-  border-radius: 8px;
 }
 
 .employee-gallery-card .employee-remove,
@@ -1262,12 +1298,8 @@ a {
   gap: 8px;
 }
 
-.employee-store-image {
-  display: block;
-  width: 100%;
+.employee-store-dropzone {
   aspect-ratio: 16 / 9;
-  object-fit: cover;
-  border-radius: 8px;
 }
 
 .employee-store-upload-group {
@@ -1726,7 +1758,7 @@ a {
     grid-template-columns: 108px minmax(0, 1fr);
   }
 
-  .employee-item-card img {
+  .employee-tire-dropzone {
     width: 108px;
     height: 108px;
   }
