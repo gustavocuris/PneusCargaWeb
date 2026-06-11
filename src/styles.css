@@ -545,7 +545,7 @@ a {
 
 .recapage-card .price-card-copy {
   justify-content: space-between;
-  padding: 22px 14px 14px 18px;
+  padding: 22px 14px 16px 18px;
 }
 
 .recapage-card .price-card-copy strong {
@@ -553,7 +553,7 @@ a {
   text-transform: uppercase;
 }
 
-.recapage-card {
+.price-card.recapage-card {
   height: 168px;
 }
 
@@ -562,40 +562,52 @@ a {
 }
 
 .recapage-actions {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 118px;
-  gap: 12px;
+  display: flex;
+  gap: 14px;
   width: 100%;
-  align-items: stretch;
+  align-items: center;
 }
 
-.recapage-actions .price-card-copy em,
+.recapage-actions em,
 .recapage-card .price-card-copy em {
   position: static;
-  width: 100%;
-  min-height: 42px;
-  padding: 8px 12px;
+  width: auto;
+  min-width: 0;
+  min-height: 38px;
+  padding: 8px 14px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 1 1 auto;
+  font-size: 0.94rem;
+  line-height: 1;
+  white-space: nowrap;
   text-align: center;
 }
 
 .recapage-card .price-whatsapp {
   position: static;
-  width: 100%;
-  min-width: 118px;
+  width: auto;
+  min-width: 0;
   display: flex;
-  min-height: 42px;
+  min-height: 38px;
   max-width: none;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(86, 255, 154, 0.34);
-  border-radius: 8px;
-  background: rgba(86, 255, 154, 0.08);
-  font-size: 0.68rem;
+  padding-inline: 2px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 0.64rem;
   line-height: 1.1;
+  white-space: nowrap;
   text-align: center;
+}
+
+.price-card.recapage-card .price-card-copy {
+  min-height: 168px;
+  overflow: hidden;
 }
 
 .price-card {
@@ -2008,7 +2020,7 @@ a {
     font-size: 0.54rem;
   }
 
-  .recapage-card {
+  .price-card.recapage-card {
     height: 164px;
   }
 
@@ -2016,7 +2028,7 @@ a {
     height: 164px;
   }
 
-  .recapage-card .price-card-copy {
+  .price-card.recapage-card .price-card-copy {
     min-height: 164px;
     padding: 14px 12px;
   }
@@ -2028,15 +2040,21 @@ a {
   }
 
   .recapage-actions {
-    grid-template-columns: minmax(0, 1fr) 96px;
+    display: flex;
     gap: 8px;
   }
 
   .recapage-card .price-whatsapp {
-    width: 100%;
-    min-width: 96px;
+    width: auto;
+    min-width: 0;
     min-height: 36px;
-    font-size: 0.58rem;
+    font-size: 0.54rem;
+  }
+
+  .recapage-card .price-card-copy em {
+    min-width: 0;
+    padding-inline: 8px;
+    font-size: 0.76rem;
   }
 }
 
