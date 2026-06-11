@@ -1081,11 +1081,13 @@ function App() {
                             <img className="price-card-image" src={imageSrc} alt={imageAlt} loading="lazy" />
                             <div className="price-card-copy">
                               <strong>{item.brand}</strong>
-                              <em>{item.value}</em>
+                              <div className="recapage-actions">
+                                <em>{item.value}</em>
+                                <a className="price-whatsapp" href={whatsappUrl} target="_blank" rel="noreferrer">
+                                  CHAME AGORA!
+                                </a>
+                              </div>
                             </div>
-                            <a className="price-whatsapp" href={whatsappUrl} target="_blank" rel="noreferrer">
-                              CHAME AGORA!
-                            </a>
                           </article>
                         );
                       })}
@@ -1208,4 +1210,3 @@ function App() {
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
-

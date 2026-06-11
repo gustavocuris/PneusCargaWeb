@@ -544,12 +544,58 @@ a {
 }
 
 .recapage-card .price-card-copy {
-  align-content: center;
+  justify-content: space-between;
+  padding: 22px 14px 14px 18px;
 }
 
 .recapage-card .price-card-copy strong {
   font-size: 1.14rem;
   text-transform: uppercase;
+}
+
+.recapage-card {
+  height: 168px;
+}
+
+.recapage-card .price-card-image {
+  height: 168px;
+}
+
+.recapage-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 118px;
+  gap: 12px;
+  width: 100%;
+  align-items: stretch;
+}
+
+.recapage-actions .price-card-copy em,
+.recapage-card .price-card-copy em {
+  position: static;
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.recapage-card .price-whatsapp {
+  position: static;
+  width: 100%;
+  min-width: 118px;
+  display: flex;
+  min-height: 42px;
+  max-width: none;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(86, 255, 154, 0.34);
+  border-radius: 8px;
+  background: rgba(86, 255, 154, 0.08);
+  font-size: 0.68rem;
+  line-height: 1.1;
+  text-align: center;
 }
 
 .price-card {
@@ -1960,6 +2006,37 @@ a {
   .price-whatsapp {
     max-width: calc(100% - 122px);
     font-size: 0.54rem;
+  }
+
+  .recapage-card {
+    height: 164px;
+  }
+
+  .recapage-card .price-card-image {
+    height: 164px;
+  }
+
+  .recapage-card .price-card-copy {
+    min-height: 164px;
+    padding: 14px 12px;
+  }
+
+  .recapage-card .price-card-copy em {
+    width: 100%;
+    min-height: 36px;
+    padding: 6px 8px;
+  }
+
+  .recapage-actions {
+    grid-template-columns: minmax(0, 1fr) 96px;
+    gap: 8px;
+  }
+
+  .recapage-card .price-whatsapp {
+    width: 100%;
+    min-width: 96px;
+    min-height: 36px;
+    font-size: 0.58rem;
   }
 }
 
